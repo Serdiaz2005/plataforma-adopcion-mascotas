@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Mascota {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  especie   String
+  raza      String?
+  edad      Int
+  tamaño    String
+  estado    EstadoMascota
+  salud     String
+  foto      String?
+  createdAt DateTime @default(now())
+
+  solicitudes SolicitudAdopcion[]
+}
+
+model Solicitante {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  telefono     String
+  direccion    String
+  tipoVivienda String
+  experiencia  String
+
+  solicitudes SolicitudAdopcion[]
+}
+
+model SolicitudAdopcion {
+  id            Int      @id @default(autoincrement())
+  estado        String
+  fecha         DateTime @default(now())
+
+  mascotaId     Int
+  solicitanteId Int
+
+  mascota       Mascota      @relation(fields: [mascotaId], references: [id])
+  solicitante   Solicitante  @relation(fields: [solicitanteId], references: [id])
+  adopcion      Adopcion?
+}
+
+model Adopcion {
+  id           Int      @id @default(autoincrement())
+  fecha        DateTime
+  solicitudId  Int      @unique
+
+  solicitud    SolicitudAdopcion @relation(fields: [solicitudId], references: [id])
+  seguimientos SeguimientoPostAdopcion[]
+}
+
+model SeguimientoPostAdopcion {
+  id          Int      @id @default(autoincrement())
+  fecha       DateTime
+  observacion String
+
+  adopcionId  Int
+  adopcion    Adopcion @relation(fields: [adopcionId], references: [id])
+}
+
+enum EstadoMascota {
+  DISPONIBLE
+  EN_PROCESO
+  ADOPTADA
+}
